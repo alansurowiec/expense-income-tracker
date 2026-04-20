@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense/Income Tracker</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #fafafa;
+      color: #111;
+    }
+
+    .page {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      margin-bottom: 36px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .header p {
+      margin-top: 8px;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ececec;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .summary-title {
+      font-size: 13px;
+      color: #7a7a7a;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .income { color: #1f7a3f; }
+    .expense { color: #c23b32; }
+    .balance { color: #2563eb; }
+
+    .month-card {
+      margin-bottom: 42px;
+    }
+
+    .month-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .month-row p {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .month-row strong {
+      color: #111;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 34px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 0 0 16px 0;
+    }
+
+    .form-card,
+    .history-card {
+      background: #fff;
+      border: 1px solid #ececec;
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    label {
+      font-size: 13px;
+      color: #555;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-family: inherit;
+      background: #fff;
+      font-size: 14px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #999;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      background: #111;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #222;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      background: #f4f4f4;
+      color: #111;
+      border: 1px solid #ddd;
+    }
+
+    .secondary-btn:hover {
+      background: #ededed;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .clear-btn {
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      color: #111;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .transaction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .transaction-item {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .transaction-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .transaction-left h3 {
+      margin: 0 0 4px;
+      font-size: 15px;
+    }
+
+    .transaction-meta {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .transaction-note {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .transaction-right {
+      text-align: right;
+      min-width: 130px;
+    }
+
+    .transaction-right p {
+      margin: 0 0 6px;
+      font-weight: 600;
+    }
+
+    .small-btn {
+      font-size: 12px;
+      background: none;
+      border: none;
+      color: #2563eb;
+      cursor: pointer;
+      margin-left: 8px;
+      padding: 0;
+    }
+
+    .small-btn.delete {
+      color: #c23b32;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #777;
+      padding: 20px 0;
+      line-height: 1.7;
+    }
+
+    .edit-text {
+      display: none;
+      font-size: 13px;
+      color: #2563eb;
+      margin-bottom: 12px;
+    }
+
+    .site-footer {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 0 20px 28px 20px;
+      text-align: center;
+    }
+
+    .site-footer p {
+      margin: 0;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .site-footer a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      width: 100%;
+      max-width: 520px;
+      border: 1px solid #ececec;
+    }
+
+    .modal h3 {
+      margin: 0 0 12px 0;
+      font-size: 20px;
+    }
+
+    .modal p {
+      margin: 0 0 12px 0;
+      color: #555;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 800px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 24px 14px;
+      }
+
+      .transaction-item {
+        flex-direction: column;
+      }
+
+      .transaction-right {
+        text-align: left;
+        min-width: 0;
+      }
+
+      .button-row,
+      .history-top,
+      .history-actions,
+      .modal-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .small-btn {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="modal-backdrop" id="noticeModal">
+    <div class="modal">
+      <h3>Before you use this tracker</h3>
+      <p>This version saves your transactions in your browser using local storage.</p>
+      <p>Because of that, it is not a good idea to use this in guest mode or incognito/private browsing, since your data may be cleared when that session ends.</p>
+      <p>If you understand that, you can continue using the tracker.</p>
+      <div class="modal-actions">
+        <button id="agreeBtn" type="button">I Understand</button>
+        <button id="leaveBtn" class="secondary-btn" type="button">Leave Page</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="header">
+      <h1>Expense Tracker</h1>
+      <p>Simple tracker stored in your browser.</p>
+    </div>
+
+<div class="summary-grid">
+  <div class="card">
+    <div class="summary-title">Income</div>
+    <div class="summary-value income" id="totalIncome">$0.00</div>
+  </div>
+  <div class="card">
+    <div class="summary-title">Expenses</div>
+    <div class="summary-value expense" id="totalExpenses">$0.00</div>
+  </div>
+  <div class="card">
+    <div class="summary-title">Balance</div>
+    <div class="summary-value balance" id="currentBalance">$0.00</div>
+  </div>
+</div>
+
+<div class="card month-card">
+  <div class="summary-title">This Month</div>
+  <div class="month-row">
+    <p>Income: <strong id="monthIncome">$0.00</strong></p>
+    <p>Expenses: <strong id="monthExpenses">$0.00</strong></p>
+    <p>Net: <strong id="monthNet">$0.00</strong></p>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="form-card">
+    <h2>Add Transaction</h2>
+    <div class="edit-text" id="editText">Editing transaction</div>
+
+    <label for="type">Type</label>
+    <select id="type">
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+
+    <label for="title">Title</label>
+    <input id="title" type="text" placeholder="Title">
+
+    <label for="amount">Amount</label>
+    <input id="amount" type="number" step="0.01" placeholder="Amount">
+
+    <label for="category">Category</label>
+    <select id="category">
+      <option value="General">General</option>
+      <option value="Work">Work</option>
+      <option value="Food">Food</option>
+      <option value="Transport">Transport</option>
+      <option value="Shopping">Shopping</option>
+      <option value="Bills">Bills</option>
+      <option value="Entertainment">Entertainment</option>
+      <option value="Savings">Savings</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="date">Date</label>
+    <input id="date" type="date">
+
+    <label for="notes">Notes</label>
+    <textarea id="notes" placeholder="Notes"></textarea>
+
+    <div class="button-row">
+      <button id="saveBtn" type="button">Add</button>
+      <button id="clearBtn" class="secondary-btn" type="button">Clear</button>
+    </div>
+  </div>
+
+  <div class="history-card">
+    <div class="history-top">
+      <h2 style="margin: 0;">Transactions</h2>
+      <div class="history-actions">
+        <button id="exportBtn" class="clear-btn" type="button">Export CSV</button>
+        <button id="clearAllBtn" class="clear-btn" type="button">Clear All</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div>
+        <label for="filterType">Filter Type</label>
+        <select id="filterType">
+          <option value="all">All</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="filterMonth">Filter Month</label>
+        <input id="filterMonth" type="month">
+      </div>
+
+      <div>
+        <label for="searchInput">Search</label>
+        <input id="searchInput" type="text" placeholder="Search">
+      </div>
+    </div>
+
+    <div id="transactionList" class="transaction-list"></div>
+  </div>
+</div>
+
+  </div>
+
+  <footer class="site-footer">
+    <p>Developed by <a href="https://github.com/alansurowiec" target="_blank" rel="noopener noreferrer">Alan Surowiec</a></p>
+  </footer>
+
+  <script>
+    let transactions = JSON.parse(localStorage.getItem("expenseTrackerTransactions")) || []
+    let editingId = null
+
+    const typeInput = document.getElementById("type")
+    const titleInput = document.getElementById("title")
+    const amountInput = document.getElementById("amount")
+    const categoryInput = document.getElementById("category")
+    const dateInput = document.getElementById("date")
+    const notesInput = document.getElementById("notes")
+
+    const saveBtn = document.getElementById("saveBtn")
+    const clearBtn = document.getElementById("clearBtn")
+    const clearAllBtn = document.getElementById("clearAllBtn")
+    const exportBtn = document.getElementById("exportBtn")
+
+    const filterType = document.getElementById("filterType")
+    const filterMonth = document.getElementById("filterMonth")
+    const searchInput = document.getElementById("searchInput")
+
+    const transactionList = document.getElementById("transactionList")
+    const totalIncome = document.getElementById("totalIncome")
+    const totalExpenses = document.getElementById("totalExpenses")
+    const currentBalance = document.getElementById("currentBalance")
+    const monthIncome = document.getElementById("monthIncome")
+    const monthExpenses = document.getElementById("monthExpenses")
+    const monthNet = document.getElementById("monthNet")
+    const editText = document.getElementById("editText")
+
+    const noticeModal = document.getElementById("noticeModal")
+    const agreeBtn = document.getElementById("agreeBtn")
+    const leaveBtn = document.getElementById("leaveBtn")
+
+    function saveTransactions() {
+      localStorage.setItem("expenseTrackerTransactions", JSON.stringify(transactions))
+    }
+
+    function formatMoney(value) {
+      return "$" + Number(value).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    }
+
+    function clearForm() {
+      typeInput.value = "income"
+      titleInput.value = ""
+      amountInput.value = ""
+      categoryInput.value = "General"
+      dateInput.value = getTodayDate()
+      notesInput.value = ""
+      editingId = null
+      saveBtn.textContent = "Add"
+      editText.style.display = "none"
+    }
+
+    function getTodayDate() {
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, "0")
+      const day = String(today.getDate()).padStart(2, "0")
+      return year + "-" + month + "-" + day
+    }
+
+    function updateTotals() {
+      let income = 0
+      let expense = 0
+
+      transactions.forEach(function (t) {
+        if (t.type === "income") {
+          income += Number(t.amount)
+        } else {
+          expense += Number(t.amount)
+        }
+      })
+
+      totalIncome.textContent = formatMoney(income)
+      totalExpenses.textContent = formatMoney(expense)
+      currentBalance.textContent = formatMoney(income - expense)
+    }
+
+    function updateMonthlySummary() {
+      const now = new Date()
+      const currentMonth = now.getMonth() + 1
+      const currentYear = now.getFullYear()
+
+      let income = 0
+      let expense = 0
+
+      transactions.forEach(function (t) {
+        if (!t.date) return
+
+        const date = new Date(t.date + "T00:00:00")
+        const month = date.getMonth() + 1
+        const year = date.getFullYear()
+
+        if (month === currentMonth && year === currentYear) {
+          if (t.type === "income") {
+            income += Number(t.amount)
+          } else {
+            expense += Number(t.amount)
+          }
+        }
+      })
+
+      monthIncome.textContent = formatMoney(income)
+      monthExpenses.textContent = formatMoney(expense)
+      monthNet.textContent = formatMoney(income - expense)
+    }
+
+    function getFilteredTransactions() {
+      let filtered = [...transactions]
+
+      if (filterType.value !== "all") {
+        filtered = filtered.filter(function (t) {
+          return t.type === filterType.value
+        })
+      }
+
+      if (filterMonth.value !== "") {
+        filtered = filtered.filter(function (t) {
+          return t.date.startsWith(filterMonth.value)
+        })
+      }
+
+      if (searchInput.value.trim() !== "") {
+        const search = searchInput.value.toLowerCase().trim()
+
+        filtered = filtered.filter(function (t) {
+          return (
+            t.title.toLowerCase().includes(search) ||
+            t.notes.toLowerCase().includes(search) ||
+            t.category.toLowerCase().includes(search)
+          )
+        })
+      }
+
+      return filtered
+    }
+
+    function render() {
+      const filtered = getFilteredTransactions()
+      transactionList.innerHTML = ""
+
+      if (filtered.length === 0 && transactions.length === 0) {
+        transactionList.innerHTML = "<div class='empty-state'>No transactions yet.<br>Add your first income or expense to get started.</div>"
+        updateTotals()
+        updateMonthlySummary()
+        return
+      }
+
+      if (filtered.length === 0) {
+        transactionList.innerHTML = "<div class='empty-state'>No transactions match your current filters.</div>"
+        updateTotals()
+        updateMonthlySummary()
+        return
+      }
+
+      filtered.forEach(function (t) {
+        const div = document.createElement("div")
+        div.className = "transaction-item"
+
+        div.innerHTML = `
+          <div class="transaction-left">
+            <h3>${escapeHtml(t.title)}</h3>
+            <div class="transaction-meta">${escapeHtml(t.type)} • ${escapeHtml(t.category)} • ${escapeHtml(t.date)}</div>
+            <div class="transaction-note">${t.notes ? escapeHtml(t.notes) : ""}</div>
+          </div>
+          <div class="transaction-right">
+            <p class="${t.type}">${t.type === "income" ? "+" : "-"}${formatMoney(t.amount)}</p>
+            <button class="small-btn" onclick="editTransaction(${t.id})">edit</button>
+            <button class="small-btn delete" onclick="removeTransaction(${t.id})">delete</button>
+          </div>
+        `
+
+        transactionList.appendChild(div)
+      })
+
+      updateTotals()
+      updateMonthlySummary()
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div")
+      div.textContent = text
+      return div.innerHTML
+    }
+
+    function addOrUpdateTransaction() {
+      const transaction = {
+        id: editingId ? editingId : Date.now(),
+        type: typeInput.value,
+        title: titleInput.value.trim(),
+        amount: Number(amountInput.value),
+        category: categoryInput.value,
+        date: dateInput.value,
+        notes: notesInput.value.trim()
+      }
+
+      if (!transaction.title || !transaction.amount || !transaction.date) {
+        alert("Fill in the title, amount, and date.")
+        return
+      }
+
+      if (transaction.amount <= 0) {
+        alert("Amount must be more than 0.")
+        return
+      }
+
+      if (editingId === null) {
+        transactions.unshift(transaction)
+      } else {
+        transactions = transactions.map(function (t) {
+          return t.id === editingId ? transaction : t
+        })
+      }
+
+      saveTransactions()
+      render()
+      clearForm()
+    }
+
+    function editTransaction(id) {
+      const transaction = transactions.find(function (t) {
+        return t.id === id
+      })
+
+      if (!transaction) {
+        return
+      }
+
+      editingId = id
+      typeInput.value = transaction.type
+      titleInput.value = transaction.title
+      amountInput.value = transaction.amount
+      categoryInput.value = transaction.category
+      dateInput.value = transaction.date
+      notesInput.value = transaction.notes
+      saveBtn.textContent = "Update"
+      editText.style.display = "block"
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      })
+    }
+
+    function removeTransaction(id) {
+      const confirmed = confirm("Delete this transaction?")
+
+      if (!confirmed) {
+        return
+      }
+
+      transactions = transactions.filter(function (t) {
+        return t.id !== id
+      })
+
+      saveTransactions()
+      render()
+
+      if (editingId === id) {
+        clearForm()
+      }
+    }
+
+    function clearAllTransactions() {
+      if (transactions.length === 0) {
+        return
+      }
+
+      const confirmed = confirm("Clear all transactions?")
+
+      if (!confirmed) {
+        return
+      }
+
+      transactions = []
+      saveTransactions()
+      render()
+      clearForm()
+    }
+
+    function exportToCsv() {
+  if (transactions.length === 0) {
+    alert("There are no transactions to export.")
+    return
+  }
+
+  let csv = "Type,Title,Amount,Category,Date,Notes\n"
+
+  transactions.forEach(function (t) {
+    const row = [
+      t.type,
+      t.title,
+      t.amount,
+      t.category,
+      "'" + t.date,
+      t.notes
+    ].map(function (value) {
+      const text = String(value).replaceAll('"', '""')
+      return '"' + text + '"'
+    }).join(",")
+
+    csv += row + "\n"
+  })
+
+  const blob = new Blob([csv], { type: "text/csv" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = "expense-tracker-export.csv"
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+    function showNoticeIfNeeded() {
+      const agreed = localStorage.getItem("expenseTrackerNoticeAccepted")
+
+      if (!agreed) {
+        noticeModal.classList.add("show")
+      }
+    }
+
+    agreeBtn.addEventListener("click", function () {
+      localStorage.setItem("expenseTrackerNoticeAccepted", "yes")
+      noticeModal.classList.remove("show")
+    })
+
+    leaveBtn.addEventListener("click", function () {
+      window.location.href = "https://www.google.com"
+    })
+
+    saveBtn.addEventListener("click", addOrUpdateTransaction)
+    clearBtn.addEventListener("click", clearForm)
+    clearAllBtn.addEventListener("click", clearAllTransactions)
+    exportBtn.addEventListener("click", exportToCsv)
+
+    filterType.addEventListener("change", render)
+    filterMonth.addEventListener("input", render)
+    searchInput.addEventListener("input", render)
+
+    clearForm()
+    render()
+    showNoticeIfNeeded()
+  </script>
+
+</body>
+</html>
